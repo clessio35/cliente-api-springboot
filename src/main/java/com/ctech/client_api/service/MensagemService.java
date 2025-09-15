@@ -13,6 +13,7 @@ public class MensagemService {
 	private RabbitTemplate rabbitTemplate;
 	
 	public void enviarMensagem(ClienteMessage mensagem) {
+		System.out.println("Send message for RabbitMQ: " + mensagem);
 		rabbitTemplate.convertAndSend("ClienteQueue", mensagem);
 	}
 }
