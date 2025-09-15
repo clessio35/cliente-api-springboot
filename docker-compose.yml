@@ -3,11 +3,14 @@ version: '3.8'
 services:
   app:
     build: .
+    container_name: client-api-app
     ports:
-      - "8080:8080"         # Mapeia a porta 8080 do container para a máquina local
+      - "8080:8080"  # Expondo a porta da aplicação
     depends_on:
-      - mysql
-      - rabbitmq
+      mysql:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_started
     environment:
       SPRING_PROFILES_ACTIVE: docker
       SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/client?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
@@ -18,19 +21,29 @@ services:
 
   mysql:
     image: mysql:8.0
+    container_name: client-api-mysql
     environment:
       MYSQL_ROOT_PASSWORD: 1234567
       MYSQL_DATABASE: client
     ports:
-      - "3306:3306"          # Mapeia a porta padrão do MySQL para a máquina local
+      - "3307:3306"
     volumes:
-      - mysql-data:/var/lib/mysql   # Persistência dos dados do banco
+      - mysql-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-p1234567"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
 
   rabbitmq:
     image: rabbitmq:3-management
+    container_name: client-api-rabbitmq
     ports:
-      - "5672:5672"           # Porta AMQP para comunicação com RabbitMQ
-      - "15672:15672"         # Porta da interface de gerenciamento web do RabbitMQ
+      - "5672:5672"     # Comunicação AMQP
+      - "15672:15672"   # Interface web
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
 
 volumes:
   mysql-data:
