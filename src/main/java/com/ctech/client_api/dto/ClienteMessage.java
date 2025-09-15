@@ -1,9 +1,15 @@
 package com.ctech.client_api.dto;
 
+import java.io.Serializable;
 import java.time.LocalDateTime;
 
-public class ClienteMessage {
+public class ClienteMessage implements Serializable{
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	
 	private String action;
 	private Long clienteId;
 	private String nome;
